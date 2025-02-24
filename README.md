@@ -32,9 +32,9 @@ Este proyecto permite **automatizar y securizar la activación y desactivación 
 
 #### 🔹 **Configurar el Webhook en Latch**
 1. En el panel de desarrolladores de Latch, busca la opción **"Webhooks"**.
-2. Introduce la URL del Middleware:
+2. Introduce la URL del Misco-LB:
 ```https://TU_DOMINIO_O_IP/latch_webhook```
-- Si estás en **localhost**, usa `ngrok` para exponer el servidor:
+- Si estás en **localhost**, usa `ngrok` para exponer Misco-LB:
   ```bash
   ngrok http 3000
   ```
@@ -131,7 +131,7 @@ curl -X POST "http://localhost:3000/latch_webhook" -H "Content-Type: application
 ## 🛠 Estructura del Código
 ```bash
 /alexa-latch-blink
-│── miscolb.py        # Código principal del Middleware
+│── miscolb.py         # Código principal de Misco-LB
 │── .env               # Archivo con credenciales
 │── requirements.txt   # Librerías necesarias
 │── README.md          # Este archivo
@@ -144,12 +144,12 @@ curl -X POST "http://localhost:3000/latch_webhook" -H "Content-Type: application
 - load_account_id() → Carga tu account_id pareado con Latch
 - save_account_id(account_id) → Guarda el account_id que acabas de parear
 
-- /webhook → Alexa avisa al Middleware cuando llegas o te vas.   
+- /webhook → Alexa avisa al Misco-LB cuando llegas o te vas.   
 - lock_latch() → Bloquea Latch cuando llegas.   
 - unlock_latch() → Desbloquea Latch cuando te vas.   
 
-- /latch_webhook → Latch avisa al Middleware cuando cambia de estado.   
-- trigger_alexa_routine(activate) → Llama a Alexa. 
+- /latch_webhook → Latch avisa al Misco-LB cuando cambia de estado.   
+- trigger_homeassistant_routine(activate) → Llama a Home Assistant. 
 
 ## 🚀 Mejoras Futuras
 ✅ Añadir soporte para múltiples cámaras en una misma cuenta de Latch.

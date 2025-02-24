@@ -36,7 +36,7 @@ def save_account_id(account_id):
 
 ACCOUNT_ID = load_account_id()
 
-# Middleware -> Latch
+# Misco-LB -> Latch
 @app.route("/pair", methods=["POST"])
 def pair():
     global ACCOUNT_ID 
@@ -56,7 +56,7 @@ def pair():
         print(f"ERROR pareando cuenta: {response.error}")
         return jsonify({"error": response.error}), 400
 
-# Middleware -> Latch
+# Misco-LB -> Latch
 def lock_latch():
     try:
         response = latch_api.lock(ACCOUNT_ID, CONTROL_CAMARA_ID)
@@ -71,7 +71,7 @@ def lock_latch():
         print(f"ERROR crítico en lock_latch(): {e}")
         return False
 
-# Middleware -> Latch
+# Misco-LB -> Latch
 def unlock_latch():
     try:
         response = latch_api.unlock(ACCOUNT_ID, CONTROL_CAMARA_ID)
@@ -86,7 +86,7 @@ def unlock_latch():
         print(f"ERROR crítico en unlock_latch(): {e}")
         return False
 
-# Alexa -> Middleware -> Latch
+# Location APP -> Misco-LB -> Latch
 @app.route("/webhook", methods=["POST"])
 def webhook():
     if not ACCOUNT_ID:
@@ -104,7 +104,7 @@ def webhook():
 
     return jsonify({"status": "error"}), 500
 
-# Middleware -> HomeAssitant-Alexa-Blink
+# Misco-LB -> HomeAssitant-Alexa-Blink
 def trigger_homeassistant_routine(activate):
     """ Activa o desactiva la cámara Blink usando Home Assitant y Alexa """
     url = HOMEASSISTANT_URL_ACTIVATE if activate else HOMEASSISTANT_URL_DEACTIVATE
@@ -126,10 +126,10 @@ def trigger_homeassistant_routine(activate):
 
     return response.json()
 
-# Latch -> Middleware -> Alexa-Blink
+# Latch -> Misco-LB -> HomeAssitant-Alexa-Blink
 @app.route("/latch_webhook", methods=["GET", "POST"])
 def latch_webhook():
-    """ Latch notifica al Middleware, y este reenvía el evento a Alexa """
+    """ Latch notifica a Misco-LB, y este reenvía el evento a Alexa """
 
     if not ACCOUNT_ID:
         return jsonify({"error": "Latch account not paired"}), 400
