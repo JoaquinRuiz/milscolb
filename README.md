@@ -6,18 +6,18 @@ Este proyecto permite **automatizar y securizar la activación y desactivación 
 ---
 
 ## 🚀 **Flujo de Funcionamiento**
-1️⃣ Mediante **Herramienta de Localización detecto que llegaste o te fuiste** de casa y envía un webhook al **Middleware**.  
-2️⃣ **El Middleware llama a Latch** para bloquear/desbloquear la operación.  
-3️⃣ **Latch notifica al Middleware** el cambio de estado.  
-4️⃣ **El Middleware llama a Blink** (a través de Alexa) para **activar o desactivar** la cámara.  
+1️⃣ Mediante **Herramienta de Localización detecto que llegaste o te fuiste** de casa y envía un webhook a **Misco-LB**.  
+2️⃣ **Misco-LB llama a Latch** para bloquear/desbloquear la operación.  
+3️⃣ **Latch notifica a Misco-LB** el cambio de estado.  
+4️⃣ **Misco-LB llama al Ayudante Binario de Home Assistant**, que a través de Alexa **activa o desactiva** la cámara.  
 
 ---
 
 ## 📌 **Requisitos Previos**
 ✅ Cuenta en [Latch](https://latch.tu.com/) y acceso al portal de desarrolladores.  
-✅ Alexa configurada con una rutina con la cámara Blink.  
-✅ Cuenta en [Amazon Developer](https://developer.amazon.com/) para los accesos a la API.  
-✅ **Python 3** y **Ngrok** instalado en tu sistema.  
+✅ Home Assitant con un Interruptor detectado con Alexa.  
+✅ Alexa configurada con una rutina que arma y desarma la cámara Blink con los cambios del Interruptor.  
+✅ Python 3 y Ngrok instalado en tu sistema.  
 
 ---
 
@@ -26,9 +26,9 @@ Este proyecto permite **automatizar y securizar la activación y desactivación 
 #### 🔹 **Crear una Aplicación en Latch**
 1. Accede a [Latch Developer Portal](https://latch.tu.com/developers).
 2. Crea una nueva aplicación y obtén:
-   - **Application ID**
-   - **Secret Key**
-3. Añade una **operación** llamada `"Control Cámara"` y guarda su **operationId**.
+   - **LATCH_APP_ID**
+   - **LATCH_SECRET_KEY**
+3. Añade una **operación** llamada `"Control Cámara"` y guarda su **CONTROL_CAMARA_ID**.
 
 #### 🔹 **Configurar el Webhook en Latch**
 1. En el panel de desarrolladores de Latch, busca la opción **"Webhooks"**.
@@ -51,24 +51,16 @@ curl -X POST "http://TU_DOMINIO_O_IP/webhook" -H "Content-Type: application/json
 ```bash 
 curl -X POST "http://TU_DOMINIO_O_IP/webhook" -H "Content-Type: application/json" -d '{"action": "arrived"}'
 ```
-### 3️⃣ **Configurar Alexa/Blink**
-#### 🔹 Necesitas un Access Token de Alexa para autenticarte. 
-1. Dentro de Amazon Developers, crea una APP "Login with Amazon"
-2. Ve a "Security Profile" en la aplicación de Login with Amazon, y añade una URL de redirección:
-```bash 
-https://TU_DOMINIO_O_IP/callback 
-```
-3. Obtén el **Access Token** usando ask-cli.
-```bash
-ask util generate-lwa-tokens --scopes alexa::ask:skills:readwrite
-```
-4. Usando ese access-token, saca el **EndpointID** de Blink.
-```bash
-curl -X GET "https://api.amazonalexa.com/v2/endpoints?owner=~caller&expand=all" \
-     -H "Authorization: Bearer TU_ACCESS_TOKEN" \
-     -H "Content-Type: application/json" \
-     -H "Accept: application/json"
-```
+
+---
+
+### 3️⃣ **Configurar Home Assistant**
+#### 🔹 Necesitas un Access Token de Home Asitant para autenticarte. 
+1. Dentro de Home Assistant, ve a Configuracion, Usuarios, y obtén un Token de larga duración
+    - **HOMEASSISTANT_TOKEN**
+2. Crea un Ayudante Binario llamado **activate_cam**, para usar como activador de la Rutina de Alexa que activa la camara y apunta sus URLs
+    - **HOMEASSISTANT_URL_ACTIVATE** = "http://URL_HOMEASSISTANT:8123/api/services/input_boolean/turn_on"
+    - **HOMEASSISTANT_URL_DEACTIVATE** = "http://URL_HOMEASSISTANT:8123/api/services/input_boolean/turn_off"
 
 ---
 
@@ -89,12 +81,13 @@ nano .env
 ```
 ##### 📌 Ejemplo de .env
 ```env
-LATCH_APP_ID = "XXX" 
-LATCH_SECRET_KEY = "XXX"
-ACCOUNT_ID = "XXX"
-CONTROL_CAMARA_ID = "XXX"
-ALEXA_ACCESS_TOKEN = "xxx"
-BLINK_ENDPOINT_ID = "xxx"
+LATCH_APP_ID = "" 
+LATCH_SECRET_KEY = ""
+ACCOUNT_ID = ""
+CONTROL_CAMARA_ID = ""
+HOMEASSISTANT_TOKEN = ""
+HOMEASSISTANT_URL_ACTIVATE = ""
+HOMEASSISTANT_URL_DEACTIVATE = ""
 ```
 ## Cómo Ejecutar el Proyecto
 ```bash
@@ -160,6 +153,7 @@ curl -X POST "http://localhost:3000/latch_webhook" -H "Content-Type: application
 
 ## 🚀 Mejoras Futuras
 ✅ Añadir soporte para múltiples cámaras en una misma cuenta de Latch.
+✅ Ampliar la compatibilidad a otras cámaras o sistemas de seguridad.
 
 ### 🏆 Créditos   
 🔹 Desarrollado por: Joaquín Ruiz [Web](https://jokiruiz.com)   
